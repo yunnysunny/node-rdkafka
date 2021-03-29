@@ -8,5 +8,12 @@
  */
 
 var kafka = require('bindings')('node-librdkafka');
+var SegfaultHandler = require('segfault-handler');
 
+// Optionally specify a callback function for custom logging. This feature is currently only supported for Node.js >= v0.12 running on Linux.
+SegfaultHandler.registerHandler("crash.log", function(signal, address, stack) {
+	// Do what you want with the signal, address, or stack (array)
+	// This callback will execute before the signal is forwarded on.
+    console.error(signal, address, stack);
+});
 module.exports = kafka;

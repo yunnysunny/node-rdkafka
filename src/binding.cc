@@ -15,6 +15,7 @@ using NodeKafka::KafkaConsumer;
 using NodeKafka::AdminClient;
 using NodeKafka::Topic;
 
+using v8::Isolate;
 using node::AtExit;
 using RdKafka::ErrorCode;
 
@@ -73,22 +74,24 @@ void ConstantsInit(v8::Local<v8::Object> exports) {
     Nan::GetFunction(Nan::New<v8::FunctionTemplate>(NodeRdKafkaBuildInFeatures)).ToLocalChecked());  // NOLINT
 }
 
-void Init(v8::Local<v8::Object> exports, v8::Local<v8::Value> m_, void* v_) {
+NAN_MODULE_INIT(Init) {
 #if NODE_MAJOR_VERSION <= 9 || (NODE_MAJOR_VERSION == 10 && NODE_MINOR_VERSION <= 15)
   AtExit(RdKafkaCleanup);
 #else
   v8::Local<v8::Context> context = Nan::GetCurrentContext();
-  node::Environment* env = node::GetCurrentEnvironment(context);
-  AtExit(env, RdKafkaCleanup, NULL);
+  // node::Environment* env = node::GetCurrentEnvironment(context);
+  Isolate* isolate = context->GetIsolate();
+  node::AddEnvironmentCleanupHook(isolate, RdKafkaCleanup, nullptr);
+  // AtExit(env, RdKafkaCleanup, NULL);
 #endif
-  KafkaConsumer::Init(exports);
-  Producer::Init(exports);
-  AdminClient::Init(exports);
-  Topic::Init(exports);
-  ConstantsInit(exports);
+  KafkaConsumer::Init(target);
+  Producer::Init(target);
+  AdminClient::Init(target);
+  Topic::Init(target);
+  ConstantsInit(target);
 
-  Nan::Set(exports, Nan::New("librdkafkaVersion").ToLocalChecked(),
+  Nan::Set(target, Nan::New("librdkafkaVersion").ToLocalChecked(),
       Nan::New(RdKafka::version_str().c_str()).ToLocalChecked());
 }
 
-NODE_MODULE(kafka, Init)
+NAN_MODULE_WORKER_ENABLED(kafka, Init)
