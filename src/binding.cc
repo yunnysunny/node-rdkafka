@@ -8,7 +8,6 @@
  */
 
 #include <iostream>
-#include <stdlib.h>
 #include "src/binding.h"
 
 using NodeKafka::Producer;
@@ -18,7 +17,6 @@ using NodeKafka::Topic;
 
 using v8::Isolate;
 using node::AtExit;
-using node::AddEnvironmentCleanupHook;
 using RdKafka::ErrorCode;
 
 static void RdKafkaCleanup(void*) {  // NOLINT
@@ -83,7 +81,7 @@ NAN_MODULE_INIT(Init) {
   v8::Local<v8::Context> context = Nan::GetCurrentContext();
   // node::Environment* env = node::GetCurrentEnvironment(context);
   Isolate* isolate = context->GetIsolate();
-  AddEnvironmentCleanupHook(isolate, RdKafkaCleanup, nullptr);
+  node::AddEnvironmentCleanupHook(isolate, RdKafkaCleanup, nullptr);
   // AtExit(env, RdKafkaCleanup, NULL);
 #endif
   KafkaConsumer::Init(target);
@@ -96,4 +94,4 @@ NAN_MODULE_INIT(Init) {
       Nan::New(RdKafka::version_str().c_str()).ToLocalChecked());
 }
 
-NAN_MODULE_WORKER_ENABLED(NODE_GYP_MODULE_NAME, Init)
+NAN_MODULE_WORKER_ENABLED(kafka, Init)
