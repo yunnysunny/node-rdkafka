@@ -58,7 +58,7 @@ $(CONFIG_OUTPUTS): node_modules/.dirstamp binding.gyp
 	@$(NODE-GYP) configure
 
 test: node_modules/.dirstamp
-	@./node_modules/.bin/mocha $(TEST_REPORTER) $(TESTS) $(TEST_OUTPUT)
+	@./node_modules/.bin/mocha $(TEST_REPORTER) $(TESTS) $(TEST_OUTPUT) --exit
 
 check: node_modules/.dirstamp
 	@$(NODE) util/test-compile.js
